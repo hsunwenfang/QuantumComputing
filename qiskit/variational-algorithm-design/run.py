@@ -11,6 +11,7 @@ from qiskit.primitives import StatevectorEstimator
 
 from qiskit_ibm_runtime import SamplerV2 as Sampler
 from qiskit_ibm_runtime import EstimatorV2 as Estimator
+from qiskit_ibm_runtime import SamplerOptions, EstimatorOptions
 from qiskit_ibm_runtime import Session
 from qiskit_ibm_runtime import options
 from qiskit_ibm_runtime import QiskitRuntimeService
@@ -55,34 +56,6 @@ def optimize_circuit_on_backend(ansatz, observable, backend):
 
     return isa_ansatz, isa_observable
 
-def main_1():
-    ansatz, observable = ansatz_vqe()
-
-    parameters = np.random.rand(ansatz.num_parameters)
-    estimator = StatevectorEstimator()
-
-    backend = get_least_busy_backend()
-    print(backend)
-
-    isa_ansatz, isa_observable = optimize_circuit_on_backend(ansatz, observable, backend)
-
-    x0 = [0.1] * ansatz.num_parameters
-
-
-    with Session(backend=backend) as session:
-        sampler = Sampler(mode=session)
-
-
-        job = sampler.run(
-            shots=1000,
-            pubs=[(isa_ansatz, [parameters])],
-        )
-        result = job.result()
-
-    session.close()
-    print(result)
-
-
 def main():
 
     ansatz, observable = ansatz_vqe()
@@ -90,11 +63,16 @@ def main():
     print(backend)
     isa_ansatz, isa_observable = optimize_circuit_on_backend(ansatz, observable, backend)
 
-    x0 = [0.1] * ansatz.num_parameters
+    # bootstrap strategy [TODO]
+    # x0 = [0.1] * ansatz.num_parameters
+    x0 = np.random.uniform(low=-np.pi, high=np.pi, size=ansatz.num_parameters)
+
+    sampler_options = options.SamplerOptions(default_shots=32)
+    estimator_options = options.EstimatorOptions(default_shots=32)
 
     with Session(backend=backend) as session:
-        sampler = Sampler(mode=session)
-        estimator = Estimator(mode=session)
+        sampler = Sampler(mode=session, options=sampler_options)
+        estimator = Estimator(mode=session, options=estimator_options)
 
         # Optimize the parameters using COBYLA
         # result = minimize(cost_func_vqe, x0, method="COBYLA")
