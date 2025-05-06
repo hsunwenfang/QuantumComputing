@@ -1,5 +1,6 @@
 
 from qiskit_ibm_runtime import QiskitRuntimeService
+from qiskit.transpiler.preset_passmanagers import generate_preset_pass_manager
 
 def get_least_busy_backend():
 
@@ -16,4 +17,19 @@ def get_simulator_backend():
 
 def get_local_aer_backend():
     from qiskit_aer import Aer
+    import warnings
+    # Suppress warnings about local testing mode
+    warnings.filterwarnings(
+        "ignore",
+        message="Options .*have no effect in local testing mode.",
+        module="qiskit_ibm_runtime.fake_provider.local_service"
+    )
     return Aer.get_backend("aer_simulator")
+
+def optimize_circuit_on_backend(ansatz, observable, backend):
+
+    pm = generate_preset_pass_manager(backend=backend, optimization_level=3)
+    isa_ansatz = pm.run(ansatz)
+    isa_observable = observable.apply_layout(layout = isa_ansatz.layout)
+
+    return isa_ansatz, isa_observable

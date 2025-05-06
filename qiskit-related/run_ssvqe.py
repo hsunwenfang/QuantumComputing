@@ -15,8 +15,7 @@ from qiskit_ibm_runtime import SamplerOptions, EstimatorOptions
 from qiskit_ibm_runtime import Session
 from qiskit_ibm_runtime import options
 
-from qiskit.transpiler.preset_passmanagers import generate_preset_pass_manager
-
+from utils import optimize_circuit_on_backend
 
 def ansatz_vqe_sample():
 
@@ -40,13 +39,6 @@ def ansatz_vqe_sample():
     return ansatz, observable
 
 
-def optimize_circuit_on_backend(ansatz, observable, backend):
-
-    pm = generate_preset_pass_manager(backend=backend, optimization_level=3)
-    isa_ansatz = pm.run(ansatz)
-    isa_observable = observable.apply_layout(layout = isa_ansatz.layout)
-
-    return isa_ansatz, isa_observable
 
 def main():
 
@@ -68,7 +60,7 @@ def main():
     sampler_options = options.SamplerOptions(default_shots=32)
     estimator_options = options.EstimatorOptions(default_shots=32)
 
-    from cost_func import cost_func_ssvqe w
+    from cost_func import cost_func_ssvqe
 
     with Session(backend=backend) as session:
         sampler = Sampler(mode=session, options=sampler_options)
