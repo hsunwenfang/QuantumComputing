@@ -15,8 +15,8 @@ def get_simulator_backend():
     backend = service.backend("ibmq_qasm_simulator")
     return backend
 
-def get_local_aer_backend():
-    from qiskit_aer import Aer
+def get_local_aer_backend(seed_simulator):
+    from qiskit_aer import AerSimulator
     import warnings
     # Suppress warnings about local testing mode
     warnings.filterwarnings(
@@ -24,7 +24,9 @@ def get_local_aer_backend():
         message="Options .*have no effect in local testing mode.",
         module="qiskit_ibm_runtime.fake_provider.local_service"
     )
-    return Aer.get_backend("aer_simulator")
+    # return Aer.get_backend("aer_simulator", seed_simulator=seed_simulator, method="statevector")
+    # return Aer.get_backend(seed_simulator=seed_simulator, method="statevector")
+    return AerSimulator(method="statevector", seed_simulator=seed_simulator)
 
 def optimize_circuit_on_backend(ansatz, observable, backend):
 
