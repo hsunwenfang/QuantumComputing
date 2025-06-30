@@ -9,5 +9,3 @@
 
 
 ## TODO
-
-Exercises 2.17
